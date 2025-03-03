@@ -237,15 +237,15 @@ def process_form_dict(current_user: str, form_dict: dict) -> str:
     return response
 
 
-def print_flask_request_info(flask_request_object: flask.Request):
+def print_flask_request_info(flask_request_object):
     """Prints information about a Flask request object."""
-    print('flask.request.headers:', remove_secret(flask_request_object.headers))
-    print('flask.request.form:', flask_request_object.form)
+    print('flask.request.headers:', remove_secret(flask_request_object.headers if flask_request_object else None))
+    print('flask.request.form:', flask_request_object.form if flask_request_object else None)
     print('flask.request:', flask_request_object)
-    print('flask.request.form.to_dict():', flask_request_object.form.to_dict())
-    print('flask.request.args:', flask_request_object.args)
-    print('flask.request.files:', flask_request_object.files)
-    print('flask.request.values:', flask_request_object.values)
-    print('flask.request.json:', flask_request_object.json)
-    print('flask.request.data:', flask_request_object.data)
+    print('flask.request.form.to_dict():', flask_request_object.form.to_dict() if flask_request_object else None)
+    print('flask.request.args:', flask_request_object.args if flask_request_object else None)
+    print('flask.request.files:', flask_request_object.files if flask_request_object else None)
+    print('flask.request.values:', flask_request_object.values if flask_request_object else None)
+    print('flask.request.json:', flask_request_object.json if flask_request_object else None)
+    print('flask.request.data:', flask_request_object.data if flask_request_object else None)
     print('---')
