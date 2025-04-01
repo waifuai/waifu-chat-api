@@ -4,10 +4,11 @@ import json
 def test_send_chat_message_form(client, monkeypatch):
     """Test sending a chat message using form data."""
     # Mock the waifuapi_process.process_form_dict function
-    def mock_process_form_dict(current_user, form_dict):
+    # Mocked function only needs form_dict as current_user is handled inside
+    def mock_process_chat_message(form_dict):
         return "Mocked response"
 
-    monkeypatch.setattr("src.blueprints.chat.process_chat_message", mock_process_form_dict)
+    monkeypatch.setattr("src.blueprints.chat.process_chat_message", mock_process_chat_message)
 
     user_id = "test_user_14"
     message = "Hello"
@@ -19,10 +20,11 @@ def test_send_chat_message_form(client, monkeypatch):
 def test_send_chat_message_json(client, monkeypatch):
     """Test sending a chat message using JSON data."""
     # Mock the waifuapi_process.process_form_dict function
-    def mock_process_form_dict(current_user, form_dict):
+    # Mocked function only needs form_dict as current_user is handled inside
+    def mock_process_chat_message(form_dict):
         return "Mocked response"
 
-    monkeypatch.setattr("src.blueprints.chat.process_chat_message", mock_process_form_dict)
+    monkeypatch.setattr("src.blueprints.chat.process_chat_message", mock_process_chat_message)
 
     user_id = "test_user_15"
     message = "Hello"
@@ -35,10 +37,11 @@ def test_send_chat_message_json(client, monkeypatch):
 def test_send_chat_message_form_no_user(client, monkeypatch):
     """Test sending a chat message using form data without user_id."""
     # Mock the waifuapi_process.process_form_dict function
-    def mock_process_form_dict(current_user, form_dict):
+    # Mocked function only needs form_dict as current_user is handled inside
+    def mock_process_chat_message(form_dict):
         return "Mocked response"
 
-    monkeypatch.setattr("src.blueprints.chat.process_chat_message", mock_process_form_dict)
+    monkeypatch.setattr("src.blueprints.chat.process_chat_message", mock_process_chat_message)
 
     message = "Hello"
     response = client.post(f"/path?message={message}")
@@ -48,10 +51,11 @@ def test_send_chat_message_form_no_user(client, monkeypatch):
 def test_send_chat_message_json_no_message(client, monkeypatch):
     """Test sending a chat message using JSON data without message."""
     # Mock the waifuapi_process.process_form_dict function
-    def mock_process_form_dict(current_user, form_dict):
+    # Mocked function only needs form_dict as current_user is handled inside
+    def mock_process_chat_message(form_dict):
         return "Mocked response"
 
-    monkeypatch.setattr("src.blueprints.chat.process_chat_message", mock_process_form_dict)
+    monkeypatch.setattr("src.blueprints.chat.process_chat_message", mock_process_chat_message)
 
     user_id = "test_user_15"
     data = {"user_id": user_id}

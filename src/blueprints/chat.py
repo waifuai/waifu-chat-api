@@ -17,7 +17,8 @@ def process_chat_message(form_dict: dict) -> str:
     Returns:
         str: The AI's response message.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:

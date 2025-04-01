@@ -1,7 +1,6 @@
 import google.cloud.translate_v2
 import logging
-from google.cloud.translate_v2 import TranslateClient
-from google.cloud.translate_v2.gapic.transports.translation_service import TranslationServiceGrpcTransport
+from google.cloud import translate_v2 as translate # Correct import
 from google.api_core import exceptions
 
 # Configure logging
@@ -21,7 +20,8 @@ def translate_text(target: str, text: str, source_language: str = 'auto') -> dic
     """
 
     try:
-        translate_client: TranslateClient = google.cloud.translate_v2.Client()
+        # Instantiate the client using the imported module
+        translate_client = translate.Client()
 
         if source_language == 'en' and target == 'en':
             result: dict = {}

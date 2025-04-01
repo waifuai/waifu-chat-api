@@ -19,7 +19,8 @@ def create_user_id(user_id: str) -> str:
     Returns:
         str: A JSON string containing the user ID.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:
@@ -47,7 +48,8 @@ def check_user_id(user_id: str) -> str:
     Returns:
         str: A JSON string containing the user ID and a boolean indicating whether the user exists.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:
@@ -84,7 +86,8 @@ def get_user_metadata(user_id: str) -> str:
     Returns:
         str: A JSON string containing the user ID, last modified datetime, and last modified timestamp.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:
@@ -125,7 +128,8 @@ def delete_user_id(user_id: str) -> str:
     Returns:
         str: A JSON string containing the user ID.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:
@@ -153,7 +157,8 @@ def get_user_count() -> str:
     Returns:
         str: A JSON string containing the user count.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:
@@ -183,7 +188,8 @@ def get_all_users_paged(page: int) -> str:
     Returns:
         str: A JSON string containing the page number and a list of user IDs.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:

@@ -3,3 +3,4 @@ requests
 google-cloud-translate
 python-dotenv
 pytest
+google-cloud-core

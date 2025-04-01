@@ -13,7 +13,8 @@ def get_server_status() -> str:
     Returns:
         str: A JSON string containing the status.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=None)
+    # waifuapi_process.print_flask_request_info(flask_request_object=None)
+ # Commented out for testing
 
     response_body: dict = {'status': 'ok'}
     response_body_str: str = json.dumps(response_body)

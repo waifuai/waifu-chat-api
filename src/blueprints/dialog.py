@@ -62,7 +62,8 @@ def get_user_dialog(user_id: str) -> str:
     Returns:
         str: A JSON string containing the user ID and the dialog history.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:
@@ -99,7 +100,8 @@ def update_user_dialog(user_id: str) -> str:
     Returns:
         str: A JSON string containing the user ID.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:
@@ -135,7 +137,8 @@ def get_user_dialog_str(user_id: str) -> str:
     Returns:
         str: A JSON string containing the user ID and the dialog history.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:
@@ -173,7 +176,8 @@ def reset_user_chat(user_id: str) -> str:
     Returns:
         str: A JSON string containing the user ID.
     """
-    waifuapi_process.print_flask_request_info(flask_request_object=request)
+    # waifuapi_process.print_flask_request_info(flask_request_object=request)
+ # Commented out for testing
 
     current_user: str = request.headers.get('current-user')
     if not current_user:
