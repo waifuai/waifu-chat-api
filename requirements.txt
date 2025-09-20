@@ -3,4 +3,8 @@ requests
 google-cloud-translate
 python-dotenv
 pytest
+pytest-flask
 google-cloud-core
+redis
+marshmallow
+blinker

@@ -1,152 +1,217 @@
 from flask import Blueprint, request, Response
 import json
-import waifuapi_db
-import waifuapi_process
 import os
+from typing import Dict, Any
+
+from ..waifuapi_logging import get_logger, handle_exception, create_error_response
+from ..waifuapi_validation import validate_user_id
+from ..waifuapi_db_pool import (
+    add_user_to_db, is_user_id_in_db, delete_user_from_db,
+    get_user_count, get_all_users_paged, get_user_last_modified_datetime,
+    get_user_last_modified_timestamp
+)
 
 users_bp = Blueprint('users', __name__)
 
+logger = get_logger("users")
 DEFAULT_CURRENT_USER: str = "0_no_current_user_specified"
 
 # v1 Create user
 @users_bp.route('/id/<user_id>', methods=['PUT'])
-def create_user_id(user_id: str) -> str:
+def create_user_id(user_id: str) -> Response:
     """Creates a new user.
 
     Args:
         user_id (str): The ID of the user to create.
 
     Returns:
-        str: A JSON string containing the user ID.
+        Response: A JSON response containing the user ID.
     """
-    # waifuapi_process.print_flask_request_info(flask_request_object=request)
- # Commented out for testing
-
-    current_user: str = request.headers.get('current-user')
-    if not current_user:
-        current_user = DEFAULT_CURRENT_USER
-    print("user_id to create is:", user_id)
-    response_body: dict = {'user_id': user_id}
-    response_body_str: str = json.dumps(response_body)
     try:
-        if not waifuapi_db.is_user_id_in_db(current_user=current_user, user_id=user_id):
-            waifuapi_db.add_user_to_db(current_user=current_user, user_id=user_id)
-        return Response(response_body_str, status=200, mimetype='application/json')
+        # Validate user_id
+        validated_user_id = validate_user_id(user_id)
+
+        current_user: str = request.headers.get('current-user')
+        if not current_user:
+            current_user = DEFAULT_CURRENT_USER
+
+        logger.info(f"Creating user: {validated_user_id} for current_user: {current_user}")
+
+        # Check if user already exists
+        if not is_user_id_in_db(current_user=current_user, user_id=validated_user_id):
+            add_user_to_db(current_user=current_user, user_id=validated_user_id)
+            logger.info(f"User created successfully: {validated_user_id}")
+        else:
+            logger.info(f"User already exists: {validated_user_id}")
+
+        response_body: Dict[str, Any] = {'user_id': validated_user_id}
+        return Response(
+            json.dumps(response_body),
+            status=200,
+            mimetype='application/json'
+        )
+
     except Exception as e:
-        print(e)
-        return Response(response_body_str, status=400, mimetype='application/json')
+        error_response = handle_exception(e, logger, f"Error creating user: {user_id}")
+        return Response(
+            json.dumps(error_response),
+            status=error_response.get("error", {}).get("status_code", 500),
+            mimetype='application/json'
+        )
 
 
 # v1 Check user exists
 @users_bp.route('/id/<user_id>', methods=['GET'])
-def check_user_id(user_id: str) -> str:
+def check_user_id(user_id: str) -> Response:
     """Checks if a user exists.
 
     Args:
         user_id (str): The ID of the user to check.
 
     Returns:
-        str: A JSON string containing the user ID and a boolean indicating whether the user exists.
+        Response: A JSON response containing the user ID and a boolean indicating whether the user exists.
     """
-    # waifuapi_process.print_flask_request_info(flask_request_object=request)
- # Commented out for testing
-
-    current_user: str = request.headers.get('current-user')
-    if not current_user:
-        current_user = DEFAULT_CURRENT_USER
-    print("user_id to check is:", user_id)
-    response_body: dict = {
-        'user_id': user_id,
-        'exists': False
-    }
-    response_body_str: str = json.dumps(response_body)
     try:
-        if waifuapi_db.is_user_id_in_db(current_user=current_user, user_id=user_id):
-            response_body['exists'] = True
-            response_body_str = json.dumps(response_body)
-            return Response(response_body_str, status=200, mimetype='application/json')
-        else:
-            return Response(response_body_str, status=404, mimetype='application/json')
+        # Validate user_id
+        validated_user_id = validate_user_id(user_id)
+
+        current_user: str = request.headers.get('current-user')
+        if not current_user:
+            current_user = DEFAULT_CURRENT_USER
+
+        logger.debug(f"Checking if user exists: {validated_user_id}")
+
+        exists = is_user_id_in_db(current_user=current_user, user_id=validated_user_id)
+
+        response_body: Dict[str, Any] = {
+            'user_id': validated_user_id,
+            'exists': exists
+        }
+
+        status_code = 200 if exists else 404
+        logger.debug(f"User {validated_user_id} exists: {exists}")
+
+        return Response(
+            json.dumps(response_body),
+            status=status_code,
+            mimetype='application/json'
+        )
+
     except Exception as e:
-        print(e)
-        response_body['exists'] = None
-        response_body_str = json.dumps(response_body)
-        return Response(response_body_str, status=400, mimetype='application/json')
+        error_response = handle_exception(e, logger, f"Error checking user: {user_id}")
+        return Response(
+            json.dumps(error_response),
+            status=error_response.get("error", {}).get("status_code", 500),
+            mimetype='application/json'
+        )
 
 
 # v1 Get user metadata
-# get the user metadata - last modified datetime and last modified timestamp
 @users_bp.route('/metadata/<user_id>', methods=['GET'])
-def get_user_metadata(user_id: str) -> str:
+def get_user_metadata(user_id: str) -> Response:
     """Gets user metadata (last modified datetime and timestamp).
 
     Args:
         user_id (str): The ID of the user.
 
     Returns:
-        str: A JSON string containing the user ID, last modified datetime, and last modified timestamp.
+        Response: A JSON response containing the user ID, last modified datetime, and last modified timestamp.
     """
-    # waifuapi_process.print_flask_request_info(flask_request_object=request)
- # Commented out for testing
-
-    current_user: str = request.headers.get('current-user')
-    if not current_user:
-        current_user = DEFAULT_CURRENT_USER
-    response_body: dict = {
-        'user_id': user_id,
-        'last_modified_datetime': None,
-        'last_modified_timestamp': None
-    }
-    response_body_str: str = json.dumps(response_body)
     try:
-        if waifuapi_db.is_user_id_in_db(current_user=current_user, user_id=user_id):
-            print("user_id to get is:", user_id)
-            last_modified_datetime_str: str = waifuapi_db.get_user_last_modified_datetime(current_user=current_user, user_id=user_id)
-            last_modified_timestamp_str: str = waifuapi_db.get_user_last_modified_timestamp(current_user=current_user, user_id=user_id)
-            response_body = {
-                'user_id': user_id,
-                'last_modified_datetime': last_modified_datetime_str,
-                'last_modified_timestamp': last_modified_timestamp_str
+        # Validate user_id
+        validated_user_id = validate_user_id(user_id)
+
+        current_user: str = request.headers.get('current-user')
+        if not current_user:
+            current_user = DEFAULT_CURRENT_USER
+
+        logger.debug(f"Getting metadata for user: {validated_user_id}")
+
+        if not is_user_id_in_db(current_user=current_user, user_id=validated_user_id):
+            response_body: Dict[str, Any] = {
+                'user_id': validated_user_id,
+                'last_modified_datetime': None,
+                'last_modified_timestamp': None
             }
-            response_body_str = json.dumps(response_body)
-            return Response(response_body_str, status=200, mimetype='application/json')
-        else:
-            return Response(response_body_str, status=404, mimetype='application/json')
+            return Response(
+                json.dumps(response_body),
+                status=404,
+                mimetype='application/json'
+            )
+
+        # Get user metadata
+        last_modified_datetime = get_user_last_modified_datetime(current_user, validated_user_id)
+        last_modified_timestamp = get_user_last_modified_timestamp(current_user, validated_user_id)
+
+        response_body = {
+            'user_id': validated_user_id,
+            'last_modified_datetime': last_modified_datetime,
+            'last_modified_timestamp': last_modified_timestamp
+        }
+
+        logger.debug(f"Retrieved metadata for user: {validated_user_id}")
+        return Response(
+            json.dumps(response_body),
+            status=200,
+            mimetype='application/json'
+        )
+
     except Exception as e:
-        print(e)
-        return Response(response_body_str, status=400, mimetype='application/json')
+        error_response = handle_exception(e, logger, f"Error getting user metadata: {user_id}")
+        return Response(
+            json.dumps(error_response),
+            status=error_response.get("error", {}).get("status_code", 500),
+            mimetype='application/json'
+        )
 
 
 # v1 Delete user
 @users_bp.route('/id/<user_id>', methods=['DELETE'])
-def delete_user_id(user_id: str) -> str:
+def delete_user_id(user_id: str) -> Response:
     """Deletes a user.
 
     Args:
         user_id (str): The ID of the user to delete.
 
     Returns:
-        str: A JSON string containing the user ID.
+        Response: A JSON response containing the user ID.
     """
-    # waifuapi_process.print_flask_request_info(flask_request_object=request)
- # Commented out for testing
-
-    current_user: str = request.headers.get('current-user')
-    if not current_user:
-        current_user = DEFAULT_CURRENT_USER
-    print("user_id to reset is:", user_id)
-    response_body: dict = {
-        'user_id': user_id
-    }
-    response_body_str: str = json.dumps(response_body)
     try:
-        if not waifuapi_db.is_user_id_in_db(current_user=current_user, user_id=user_id):
-            return Response(response_body_str, status=404, mimetype='application/json')
-        waifuapi_db.delete_user_from_db(current_user=current_user, user_id=user_id)
-        return Response(response_body_str, status=200, mimetype='application/json')
+        # Validate user_id
+        validated_user_id = validate_user_id(user_id)
+
+        current_user: str = request.headers.get('current-user')
+        if not current_user:
+            current_user = DEFAULT_CURRENT_USER
+
+        logger.info(f"Deleting user: {validated_user_id}")
+
+        if not is_user_id_in_db(current_user=current_user, user_id=validated_user_id):
+            response_body: Dict[str, Any] = {'user_id': validated_user_id}
+            return Response(
+                json.dumps(response_body),
+                status=404,
+                mimetype='application/json'
+            )
+
+        delete_user_from_db(current_user=current_user, user_id=validated_user_id)
+
+        response_body = {'user_id': validated_user_id}
+        logger.info(f"User deleted successfully: {validated_user_id}")
+
+        return Response(
+            json.dumps(response_body),
+            status=200,
+            mimetype='application/json'
+        )
+
     except Exception as e:
-        print(e)
-        return Response(response_body_str, status=400, mimetype='application/json')
+        error_response = handle_exception(e, logger, f"Error deleting user: {user_id}")
+        return Response(
+            json.dumps(error_response),
+            status=error_response.get("error", {}).get("status_code", 500),
+            mimetype='application/json'
+        )
 
 
 # v1 Get users count

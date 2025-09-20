@@ -1,14 +1,14 @@
 from flask import Blueprint, request, Response
 import json
 import waifuapi_process
-import os
-from dotenv import load_dotenv
-load_dotenv()
+from ..waifuapi_validation import validate_form_dict, ValidationError
+from ..waifuapi_logging import get_logger, handle_exception, create_error_response
+from ..waifuapi_config import get_app_config
 
 chat_bp = Blueprint('chat', __name__)
 
+logger = get_logger("chat")
 DEFAULT_CURRENT_USER: str = "0_no_current_user_specified"
-DEFAULT_MSG: str = os.environ.get("DEFAULT_RESPONSE", "The AI model is currently unavailable. Please try again later.")
 
 
 def process_chat_message(form_dict: dict) -> str:
@@ -17,65 +17,106 @@ def process_chat_message(form_dict: dict) -> str:
     Returns:
         str: The AI's response message.
     """
-    # waifuapi_process.print_flask_request_info(flask_request_object=request)
- # Commented out for testing
+    try:
+        config = get_app_config()
+        default_msg = config.default_response
+    except Exception:
+        default_msg = "The AI model is currently unavailable. Please try again later."
 
+    # Get current user from headers
     current_user: str = request.headers.get('current-user')
     if not current_user:
         current_user = DEFAULT_CURRENT_USER
 
     try:
-        response: str = waifuapi_process.process_form_dict(current_user=current_user, form_dict=form_dict)
-        TEMP_ERROR_MSG: str = "error"
-        if response == TEMP_ERROR_MSG:
-            print(f"error: {TEMP_ERROR_MSG}")
+        # Validate form data
+        validated_form_dict = validate_form_dict(form_dict)
+        logger.debug(f"Processing validated form data for user: {current_user}")
+
+        # Process the chat message
+        response: str = waifuapi_process.process_form_dict(
+            current_user=current_user,
+            form_dict=validated_form_dict
+        )
+
+        # Check for temporary error messages
+        if response == "error":
+            logger.warning(f"Temporary error for user {current_user}")
             response = "Temporary error, please try again in 30 seconds."
 
+        return response
+
+    except ValidationError as e:
+        logger.warning(f"Validation error for user {current_user}: {e}")
+        return default_msg
     except Exception as e:
-        print(e)
-        response = DEFAULT_MSG
-    return response
+        error_response = handle_exception(e, logger, f"Chat processing error for user {current_user}")
+        return default_msg
 
 
 # v1 Send chat message
 @chat_bp.route('/path', methods=['POST'])
-def main() -> str:
+def main() -> Response:
     """Handles chat message requests (using form data).
 
     Returns:
-        str: The AI's response message.
+        Response: The AI's response message.
     """
-    form_dict: dict = request.args.to_dict()
-    if not form_dict:
-        form_dict = {}
-    return process_chat_message(form_dict=form_dict)
+    try:
+        form_dict: dict = request.args.to_dict()
+        if not form_dict:
+            form_dict = {}
+
+        response_text = process_chat_message(form_dict=form_dict)
+        logger.info("Chat message processed successfully via form data")
+        return Response(response_text, status=200, mimetype='text/plain')
+
+    except Exception as e:
+        error_response = handle_exception(e, logger, "Form chat endpoint error")
+        return Response(
+            json.dumps(error_response),
+            status=error_response.get("error", {}).get("status_code", 500),
+            mimetype='application/json'
+        )
 
 
 # v1 Send chat message
 @chat_bp.route('/v1/waifu', methods=['POST'])
-def waifu() -> str:
+def waifu() -> Response:
     """Handles chat message requests (using JSON data).
 
     Returns:
-        str: A JSON string containing the user ID and the AI's response.
+        Response: A JSON response containing the user ID and the AI's response.
     """
-    form_dict: dict = request.json
-    if not form_dict:
-        form_dict = {}
-    user_id: str = form_dict.get('user_id')
-    username: str = form_dict.get('username')
-    message: str = form_dict.get('message')
-    from_name: str = form_dict.get('from_name')
-    to_name: str = form_dict.get('to_name')
-    situation: str = form_dict.get('situation')
-    translate_from: str = form_dict.get('translate_from')
-    translate_to: str = form_dict.get('translate_to')
+    try:
+        form_dict: dict = request.get_json() or {}
+        user_id: str = form_dict.get('user_id', '')
+        username: str = form_dict.get('username', '')
+        message: str = form_dict.get('message', '')
+        from_name: str = form_dict.get('from_name', '')
+        to_name: str = form_dict.get('to_name', '')
+        situation: str = form_dict.get('situation', '')
+        translate_from: str = form_dict.get('translate_from', '')
+        translate_to: str = form_dict.get('translate_to', '')
 
-    response: str = process_chat_message(form_dict=form_dict)
+        response: str = process_chat_message(form_dict=form_dict)
 
-    response_json: dict = {
-        "user_id": user_id,
-        "response": response
-    }
-    response_json_string: str = json.dumps(response_json)
-    return Response(response_json_string, status=200, mimetype='application/json')
+        response_json: dict = {
+            "user_id": user_id,
+            "response": response
+        }
+
+        logger.info(f"Chat message processed successfully for user: {user_id}")
+        return Response(
+            json.dumps(response_json),
+            status=200,
+            mimetype='application/json'
+        )
+
+    except Exception as e:
+        error_response = handle_exception(e, logger, "JSON chat endpoint error")
+        return Response(
+            json.dumps(error_response),
+            status=error_response.get("error", {}).get("status_code", 500),
+            mimetype='application/json'
+        )
