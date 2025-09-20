@@ -1,3 +1,10 @@
+"""
+Test suite for user management functionality in WaifuAPI.
+This module contains comprehensive tests for user endpoints including creating,
+checking existence, retrieving metadata, deleting users, and managing user lists.
+Tests cover both successful operations and edge cases like non-existent users,
+duplicate creation, and pagination functionality.
+"""
 import pytest
 import json
 import sqlite3

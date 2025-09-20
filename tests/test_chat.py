@@ -1,3 +1,9 @@
+"""
+Test suite for chat functionality in WaifuAPI.
+This module contains tests for chat endpoints including form-based and JSON-based
+message sending, validation of responses, and error handling scenarios.
+Tests use mocked dependencies to isolate the chat blueprint functionality.
+"""
 import pytest
 import json
 

@@ -1,3 +1,9 @@
+"""
+Database operations module for WaifuAPI.
+This module provides direct SQLite database operations for managing user dialogs,
+including creating, updating, retrieving, and deleting user data and dialog history.
+Uses direct SQLite connections with proper error handling and transaction management.
+"""
 import sqlite3
 import time
 import datetime

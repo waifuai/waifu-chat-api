@@ -1,3 +1,9 @@
+"""
+Test suite for server status functionality in WaifuAPI.
+This module contains tests for status endpoints including checking server
+health and handling invalid routes. Tests verify that the API properly
+reports server status and handles error cases appropriately.
+"""
 import pytest
 import json
 

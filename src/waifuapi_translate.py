@@ -1,3 +1,9 @@
+"""
+Translation services module for WaifuAPI.
+This module provides integration with Google Cloud Translation API to handle
+text translation between different languages. It includes functions for translating
+text, detecting source languages, and validating language codes for the chat system.
+"""
 import google.cloud.translate_v2
 import logging
 from google.cloud import translate_v2 as translate # Correct import

@@ -1,3 +1,10 @@
+"""
+Test suite for dialog functionality in WaifuAPI.
+This module contains tests for dialog management endpoints including getting
+dialog in JSON and string formats, setting dialog from JSON, resetting dialog
+history, and handling edge cases like non-existent users and empty dialogs.
+Tests verify proper database operations and API responses.
+"""
 import pytest
 import json
 import sqlite3

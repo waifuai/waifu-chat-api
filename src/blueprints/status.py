@@ -1,3 +1,9 @@
+"""
+Status blueprint module for WaifuAPI.
+This module defines Flask routes for checking server status and health.
+It provides a simple endpoint to verify that the API server is running
+and responding to requests.
+"""
 from flask import Blueprint, Response
 import json
 import waifuapi_process

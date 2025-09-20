@@ -1,3 +1,10 @@
+"""
+Users blueprint module for WaifuAPI.
+This module defines Flask routes for managing users, including creating, checking,
+updating metadata, and deleting users. It also provides endpoints for getting
+user counts and paginated lists of users with proper validation, error handling,
+and database operations.
+"""
 from flask import Blueprint, request, Response
 import json
 import os

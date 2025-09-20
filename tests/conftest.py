@@ -1,3 +1,9 @@
+"""
+Test configuration module for WaifuAPI.
+This module provides pytest fixtures and configuration for running tests,
+including database setup/teardown, Flask app instances, and test clients.
+It ensures proper isolation between tests and handles cleanup of test resources.
+"""
 import pytest
 import os
 import tempfile

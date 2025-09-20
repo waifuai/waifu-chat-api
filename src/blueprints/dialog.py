@@ -1,3 +1,10 @@
+"""
+Dialog blueprint module for WaifuAPI.
+This module defines Flask routes for managing user dialog history, including
+getting dialog in JSON or string format, setting dialog from JSON, and resetting
+dialog history. It provides endpoints for users to manage their conversation
+history with proper validation, error handling, and database operations.
+"""
 from flask import Blueprint, request, Response
 import json
 import re

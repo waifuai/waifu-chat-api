@@ -1,3 +1,10 @@
+"""
+Chat message processing module for WaifuAPI.
+This module handles the core chat functionality, including message processing,
+translation services integration, dialog management, and communication with the AI model.
+It provides functions for processing user messages, managing conversations, and handling
+translation between different languages.
+"""
 import requests
 import re
 import flask

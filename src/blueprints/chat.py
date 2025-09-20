@@ -1,3 +1,10 @@
+"""
+Chat blueprint module for WaifuAPI.
+This module defines Flask routes for handling chat messages, both through form data
+(POST /path) and JSON data (POST /v1/waifu). It provides endpoints for users to
+send messages to the AI model and receive responses, with proper validation,
+error handling, and logging.
+"""
 from flask import Blueprint, request, Response
 import json
 import waifuapi_process

@@ -1,3 +1,10 @@
+"""
+Main Flask application module for WaifuAPI.
+This module creates and configures the Flask application instance, registers all
+blueprints (chat, dialog, status, users), sets up error handlers, initializes
+the database connection pool, and provides the application factory pattern.
+Serves as the entry point for running the Waifu Chat API server.
+"""
 import os
 import flask
 from dotenv import load_dotenv
